@@ -36,7 +36,7 @@ for root, dirs, files in os.walk(image_dir):
 			faces = face_cascade.detectMultiScale(image_array, scaleFactor=1.5, minNeighbors=5)
 
 			for (x,y,w,h) in faces:
-				roi = image_array[y-20:y+h+20, x-20:x+w+20]
+				roi = image_array[y-50:y+h+50, x-50:x+w+50]
 				x_train.append(roi)
 				y_labels.append(id_)
 

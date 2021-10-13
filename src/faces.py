@@ -26,9 +26,9 @@ while(True):
     for (x, y, w, h) in faces:
         # print(x,y,w,h)
 
-        roi_gray = gray[y-20:y+h, x-20:x+w]  # (ycord_start, ycord_end)
-        roi_color = frame[y-20:y+h, x-20:x+w]
-        cv2.imshow('fram1e', gray[y-20:y+h+20, x-20:x+w+20])
+        roi_gray = gray[y-50:y+h+50, x-50:x+w+50]  # (ycord_start, ycord_end)
+        roi_color = frame[y-50:y+h+50, x-50:x+w+50]
+        cv2.imshow('fram1e', gray[y-50:y+h+50, x-50:x+w+50])
 
         
         #[y:y+h, x:x+w]
