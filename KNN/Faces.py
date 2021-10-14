@@ -127,7 +127,7 @@ def predict(X_img_path, knn_clf=None, model_path=None, distance_threshold=0.6):
 
     # Load image file and find face locations
     X_img = face_recognition.load_image_file(X_img_path)
-    X_face_locations = face_recognition.face_locations(X_img)
+    X_face_locations = face_recognition.face_locations(X_img, model="cnn")
 
     # If no faces are found in the image, return an empty result.
     if len(X_face_locations) == 0:
@@ -224,11 +224,12 @@ if __name__ == "__main__":
                 color = (255, 255, 255)
                 stroke = 2
 
-                cv2.putText(frame, name, (bottom, left), font, 1, color, stroke, cv2.LINE_AA)
+
+                cv2.putText(frame, name, (left, top), font, 1, color, stroke, cv2.LINE_AA)
                 cv2.putText(frame,'Brightness/Visiblity: '+condition,(80,30), font,1,(255,255,255),1,cv2.LINE_AA)
                 cv2.putText(frame,'Press Q to Quit',(5,470), font,0.5,(255,255,255),1,cv2.LINE_AA)
-               
-
+                cv2.rectangle(frame, (left, top), (right, bottom), color, 4)
+                
             # Display results overlaid on an image
             # show_prediction_labels_on_image(os.path.join(unknown_dir, image_file), predictions)
 
