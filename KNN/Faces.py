@@ -31,6 +31,7 @@ from face_recognition.face_recognition_cli import image_files_in_folder
 
 import cv2
 import numpy as np
+from itertools import chain
 
 
 ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg'}
@@ -186,7 +187,24 @@ if __name__ == "__main__":
 
     while(True):
         ret, frame = cap.read()
-        gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
+        gray = cv2.cvtColor(frame, cv2.COLOR_BGR2HLS)
+        Lchannel = gray[:,:,1]
+           
+        a=list(chain.from_iterable(Lchannel))
+        brightness=sum(a)/len(a)
+        if(brightness<=75):
+            condition="Very Poor"
+        if(brightness<=85 and brightness >75):
+            condition=" Poor"
+        if(brightness<=95 and brightness >85):
+            condition="Good"
+        
+        if(brightness <=105 and brightness >95):
+            condition="Very Poor"
+        if(brightness >105):
+            condition="Excellent"
+
+        print(condition)
         
         cv2.imwrite(os.path.join(unknown_dir , 'waka.jpg'), frame)
     # STEP 2: Using the trained classifier, make predictions for unknown images
@@ -207,6 +225,9 @@ if __name__ == "__main__":
                 stroke = 2
 
                 cv2.putText(frame, name, (bottom, left), font, 1, color, stroke, cv2.LINE_AA)
+                cv2.putText(frame,'Brightness/Visiblity: '+condition,(80,30), font,1,(255,255,255),1,cv2.LINE_AA)
+                cv2.putText(frame,'Press Q to Quit',(5,470), font,0.5,(255,255,255),1,cv2.LINE_AA)
+               
 
             # Display results overlaid on an image
             # show_prediction_labels_on_image(os.path.join(unknown_dir, image_file), predictions)
