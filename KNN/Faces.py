@@ -127,7 +127,7 @@ def predict(X_img_path, knn_clf=None, model_path=None, distance_threshold=0.6):
 
     # Load image file and find face locations
     X_img = face_recognition.load_image_file(X_img_path)
-    X_face_locations = face_recognition.face_locations(X_img, model="cnn")
+    X_face_locations = face_recognition.face_locations(X_img)
 
     # If no faces are found in the image, return an empty result.
     if len(X_face_locations) == 0:
@@ -181,32 +181,33 @@ if __name__ == "__main__":
     classifier = train(image_dir, os.path.join(BASE_DIR, "trained_knn_model.clf"), n_neighbors=2)
     print("Training complete!")
 
-    face_cascade = cv2.CascadeClassifier('cascades/data/haarcascade_frontalface_alt2.xml')
+    # face_cascade = cv2.CascadeClassifier('cascades/data/haarcascade_frontalface_alt2.xml')
 
     cap = cv2.VideoCapture(0)
 
     while(True):
         ret, frame = cap.read()
         gray = cv2.cvtColor(frame, cv2.COLOR_BGR2HLS)
-        Lchannel = gray[:,:,1]
-           
-        a=list(chain.from_iterable(Lchannel))
-        brightness=sum(a)/len(a)
-        if(brightness<=75):
-            condition="Very Poor"
-        if(brightness<=85 and brightness >75):
-            condition=" Poor"
-        if(brightness<=95 and brightness >85):
-            condition="Good"
-        
-        if(brightness <=105 and brightness >95):
-            condition="Very Poor"
-        if(brightness >105):
-            condition="Excellent"
 
-        print(condition)
+        # Lchannel = gray[:,:,1]
+           
+        # a=list(chain.from_iterable(Lchannel))
+        # brightness=sum(a)/len(a)
+        # if(brightness<=75):
+        #     condition="Very Poor"
+        # if(brightness<=85 and brightness >75):
+        #     condition=" Poor"
+        # if(brightness<=95 and brightness >85):
+        #     condition="Good"
         
-        cv2.imwrite(os.path.join(unknown_dir , 'waka.jpg'), frame)
+        # if(brightness <=105 and brightness >95):
+        #     condition="Very Poor"
+        # if(brightness >105):
+        #     condition="Excellent"
+
+        # print(condition)
+        
+        cv2.imwrite(os.path.join(unknown_dir , 'unknown.jpg'), frame)
     # STEP 2: Using the trained classifier, make predictions for unknown images
         for image_file in os.listdir(unknown_dir):
             full_file_path = os.path.join(unknown_dir, image_file)
@@ -226,7 +227,7 @@ if __name__ == "__main__":
 
 
                 cv2.putText(frame, name, (left, top), font, 1, color, stroke, cv2.LINE_AA)
-                cv2.putText(frame,'Brightness/Visiblity: '+condition,(80,30), font,1,(255,255,255),1,cv2.LINE_AA)
+                # cv2.putText(frame,'Brightness/Visiblity: '+condition,(80,30), font,1,(255,255,255),1,cv2.LINE_AA)
                 cv2.putText(frame,'Press Q to Quit',(5,470), font,0.5,(255,255,255),1,cv2.LINE_AA)
                 cv2.rectangle(frame, (left, top), (right, bottom), color, 4)
                 
