@@ -178,7 +178,7 @@ if __name__ == "__main__":
     # STEP 1: Train the KNN classifier and save it to disk
     # Once the model is trained and saved, you can skip this step next time.
     print("Training KNN classifier...")
-    classifier = train(image_dir, os.path.join(BASE_DIR, "trained_knn_model.clf"), n_neighbors=2)
+    # classifier = train(image_dir, os.path.join(BASE_DIR, "trained_knn_model.clf"), n_neighbors=2)
     print("Training complete!")
 
     # face_cascade = cv2.CascadeClassifier('cascades/data/haarcascade_frontalface_alt2.xml')
