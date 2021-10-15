@@ -66,7 +66,7 @@ def predict(X_img_path, knn_clf=None, model_path=None, distance_threshold=0.6):
 
     # Load image file and find face locations
     X_img = face_recognition.load_image_file(X_img_path)
-    X_face_locations = face_recognition.face_locations(X_img)
+    X_face_locations = face_recognition.face_locations(X_img, model="cnn")
 
     # If no faces are found in the image, return an empty result.
     if len(X_face_locations) == 0:
@@ -82,71 +82,19 @@ def predict(X_img_path, knn_clf=None, model_path=None, distance_threshold=0.6):
     # Predict classes and remove classifications that aren't within the threshold
     return [(pred, loc) if rec else ("unknown", loc) for pred, loc, rec in zip(knn_clf.predict(faces_encodings), X_face_locations, are_matches)]
 
-
-def show_prediction_labels_on_image(img_path, predictions):
-    """
-    Shows the face recognition results visually.
-    :param img_path: path to image to be recognized
-    :param predictions: results of the predict function
-    :return:
-    """
-    pil_image = Image.open(img_path).convert("RGB")
-    draw = ImageDraw.Draw(pil_image)
-
-    for name, (top, right, bottom, left) in predictions:
-        # Draw a box around the face using the Pillow module
-        draw.rectangle(((left, top), (right, bottom)), outline=(0, 0, 255))
-
-        # There's a bug in Pillow where it blows up with non-UTF-8 text
-        # when using the default bitmap font
-        name = name.encode("UTF-8")
-
-        # Draw a label with a name below the face
-        text_width, text_height = draw.textsize(name)
-        draw.rectangle(((left, bottom - text_height - 10), (right, bottom)), fill=(0, 0, 255), outline=(0, 0, 255))
-        draw.text((left + 6, bottom - text_height - 5), name, fill=(255, 255, 255, 255))
-
-    # Remove the drawing library from memory as per the Pillow docs
-    del draw
-
-    # Display the resulting image
-    pil_image.show()
-
-
 def start():
     # STEP 1: Train the KNN classifier and save it to disk
     # Once the model is trained and saved, you can skip this step next time.
-    # print("Training KNN classifier...")
-    # classifier = train(image_dir, os.path.join(BASE_DIR, "trained_knn_model.clf"), n_neighbors=2)
-    # print("Training complete!")
 
-    # face_cascade = cv2.CascadeClassifier('cascades/data/haarcascade_frontalface_alt2.xml')
+    cap = cv2.VideoCapture(0)
 
-    cap = cv2.VideoCapture(2)
+    cropedFrame = []
+    color = (255, 255, 255)
 
     while(True):
         ret, frame = cap.read()
-        gray = cv2.cvtColor(frame, cv2.COLOR_BGR2HLS)
-
-        # Lchannel = gray[:,:,1]
-           
-        # a=list(chain.from_iterable(Lchannel))
-        # brightness=sum(a)/len(a)
-        # if(brightness<=75):
-        #     condition="Very Poor"
-        # if(brightness<=85 and brightness >75):
-        #     condition=" Poor"
-        # if(brightness<=95 and brightness >85):
-        #     condition="Good"
-        
-        # if(brightness <=105 and brightness >95):
-        #     condition="Very Poor"
-        # if(brightness >105):
-        #     condition="Excellent"
-
-        # print(condition)
-        
         cv2.imwrite(os.path.join(unknown_dir , 'unknown.jpg'), frame)
+
     # STEP 2: Using the trained classifier, make predictions for unknown images
         for image_file in os.listdir(unknown_dir):
             full_file_path = os.path.join(unknown_dir, image_file)
@@ -160,21 +108,29 @@ def start():
             # Print results on the console
             for name, (top, right, bottom, left) in predictions:
                 print("- Found {} at ({}, {})".format(name, left, top))
-                font = cv2.FONT_HERSHEY_SIMPLEX     
-                color = (255, 255, 255)
+                font = cv2.FONT_HERSHEY_SIMPLEX               
                 stroke = 2
+                cropedFrame.append(name)
 
+                try:
+                    if (cropedFrame[0] == cropedFrame[1]):
+                        color = (0, 255, 0)
+                    else:
+                        color = (0,0,255)
+                except:
+                    pass
 
-                cv2.putText(frame, name, (left, top), font, 1, color, stroke, cv2.LINE_AA)
-                # cv2.putText(frame,'Brightness/Visiblity: '+condition,(80,30), font,1,(255,255,255),1,cv2.LINE_AA)
                 cv2.putText(frame,'Press Q to Quit',(5,470), font,0.5,(255,255,255),1,cv2.LINE_AA)
+
+            for name, (top, right, bottom, left) in predictions:
                 cv2.rectangle(frame, (left, top), (right, bottom), color, 4)
-                
-            # Display results overlaid on an image
-            # show_prediction_labels_on_image(os.path.join(unknown_dir, image_file), predictions)
+                cv2.putText(frame, name, (left, top), font, 1, color, stroke, cv2.LINE_AA)
+
+            color = (255, 255, 255)
+            cropedFrame = []
 
         cv2.imshow('frame', frame)
-        if cv2.waitKey(1) & 0xFF == ord('q'):          
+        if cv2.waitKey(1) & 0xFF == ord('q'):
             break
        
     cv2.destroyAllWindows()
