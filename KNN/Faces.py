@@ -42,7 +42,7 @@ unknown_dir = os.path.join(BASE_DIR, "unknown")
 
 #"recognizers/face-trainner.yml"
 
-def predict(X_img_path, knn_clf=None, model_path=None, distance_threshold=0.6):
+def predict(X_img_path, knn_clf=None, model_path=None, distance_threshold=0.48):
     """
     Recognizes faces in given image using a trained KNN classifier
     :param X_img_path: path to image to be recognized
@@ -66,7 +66,7 @@ def predict(X_img_path, knn_clf=None, model_path=None, distance_threshold=0.6):
 
     # Load image file and find face locations
     X_img = face_recognition.load_image_file(X_img_path)
-    X_face_locations = face_recognition.face_locations(X_img, model="cnn")
+    X_face_locations = face_recognition.face_locations(X_img)
 
     # If no faces are found in the image, return an empty result.
     if len(X_face_locations) == 0:
