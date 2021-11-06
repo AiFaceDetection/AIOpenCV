@@ -86,7 +86,7 @@ def start():
     # STEP 1: Train the KNN classifier and save it to disk
     # Once the model is trained and saved, you can skip this step next time.
 
-    cap = cv2.VideoCapture(0)
+    cap = cv2.VideoCapture(2)
 
     cropedFrame = []
     color = (255, 255, 255)
