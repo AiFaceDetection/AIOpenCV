@@ -34,6 +34,7 @@ import numpy as np
 from itertools import chain
 
 
+
 ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg'}
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
@@ -86,13 +87,26 @@ def start():
     # STEP 1: Train the KNN classifier and save it to disk
     # Once the model is trained and saved, you can skip this step next time.
 
-    cap = cv2.VideoCapture(2)
+    cap = cv2.VideoCapture(0)
+
+    cap.set(3,2560)
+    # 1920 full HD
+    # 2560 2K
+
 
     cropedFrame = []
     color = (255, 255, 255)
 
     while(True):
         ret, frame = cap.read()
+        overlay = cv2.imread('maskOverlay.png', cv2.IMREAD_UNCHANGED)
+        # cv2.imshow("overlay", overlay)
+        # frame = cv2.addWeighted(frame,0.5,overlay,0.5,0)
+        
+        print(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
+        print(cap.get(cv2.CAP_PROP_FRAME_WIDTH))
+
+
         cv2.imwrite(os.path.join(unknown_dir , 'unknown.jpg'), frame)
 
     # STEP 2: Using the trained classifier, make predictions for unknown images
@@ -110,6 +124,8 @@ def start():
                 print("- Found {} at ({}, {})".format(name, left, top))
                 font = cv2.FONT_HERSHEY_SIMPLEX               
                 stroke = 2
+
+
                 cropedFrame.append(name)
 
                 try:
