@@ -33,6 +33,7 @@ import cv2
 import numpy as np
 from itertools import chain
 
+import threading
 
 
 ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg'}
@@ -40,7 +41,9 @@ ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg'}
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 image_dir = os.path.join(BASE_DIR, "images")
 unknown_dir = os.path.join(BASE_DIR, "unknown")
-
+card_dir = os.path.join(BASE_DIR, "card")
+face_dir = os.path.join(BASE_DIR, "face")
+ 
 #"recognizers/face-trainner.yml"
 
 def predict(X_img_path, knn_clf=None, model_path=None, distance_threshold=0.48):
@@ -83,28 +86,49 @@ def predict(X_img_path, knn_clf=None, model_path=None, distance_threshold=0.48):
     # Predict classes and remove classifications that aren't within the threshold
     return [(pred, loc) if rec else ("unknown", loc) for pred, loc, rec in zip(knn_clf.predict(faces_encodings), X_face_locations, are_matches)]
 
+
+
+def deleteCompareFile():
+    for file in os.listdir(card_dir):
+        full_file_path = os.path.join(card_dir, file)
+        os.remove(full_file_path)
+    for file in os.listdir(face_dir):
+        full_file_path = os.path.join(face_dir, file)
+        os.remove(full_file_path)
+
+
+def encodeImg(tID, word):
+    print("thread" + str(tID) + word)
+
 def start():
     # STEP 1: Train the KNN classifier and save it to disk
     # Once the model is trained and saved, you can skip this step next time.
 
     cap = cv2.VideoCapture(0)
 
-    cap.set(3,2560)
+    cap.set(3,1920)
     # 1920 full HD
     # 2560 2K
+
+    HEIGHT = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
+    WIDTH = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH))
 
 
     cropedFrame = []
     color = (255, 255, 255)
 
+    x = 0
+
     while(True):
         ret, frame = cap.read()
-        overlay = cv2.imread('maskOverlay.png', cv2.IMREAD_UNCHANGED)
-        # cv2.imshow("overlay", overlay)
-        # frame = cv2.addWeighted(frame,0.5,overlay,0.5,0)
-        
-        print(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
-        print(cap.get(cv2.CAP_PROP_FRAME_WIDTH))
+
+        # Mask for CARD
+        cv2.rectangle(frame, (0+10, 0+10), (int(40 * WIDTH // 100)-10, HEIGHT-10), color, 4)
+        # Mask for FACE
+        cv2.rectangle(frame, (int(40 * WIDTH // 100)+10, 0+10), (WIDTH-10, HEIGHT-10), color, 4)
+       
+        # print(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
+        # print(cap.get(cv2.CAP_PROP_FRAME_WIDTH))
 
 
         cv2.imwrite(os.path.join(unknown_dir , 'unknown.jpg'), frame)
@@ -125,20 +149,49 @@ def start():
                 font = cv2.FONT_HERSHEY_SIMPLEX               
                 stroke = 2
 
-
                 cropedFrame.append(name)
 
-                try:
-                    if (cropedFrame[0] == cropedFrame[1]):
-                        color = (0, 255, 0)
-                    else:
-                        color = (0,0,255)
-                except:
-                    pass
+                if (len(predictions) == 2): # Have 2 face in frame
+                    color = (0, 255, 0)
+                    for i in range(3):
+                        if ((top > 0 and left > 0) and (bottom < HEIGHT and right < int(40 * WIDTH // 100))):
+                            cv2.imwrite(os.path.join(card_dir, str(i) + '.jpg'), frame[0+20:HEIGHT-20, 0+20:int(40 * WIDTH // 100)-20])
+                        # FACE
+                        elif ((top > 0 and left > 40 * WIDTH / 100) and (bottom < HEIGHT and right < WIDTH)):
+                            cv2.imwrite(os.path.join(face_dir, str(i) + '.jpg'), frame[0+20:HEIGHT-20, int(40 * WIDTH // 100)+20: int(40 * WIDTH // 100) + WIDTH - int(40 * WIDTH // 100)-20])
+
+                    face1 = cv2.imread("/face/1.jpg")
+                    # face2 = cv2.imread("/face/2.jpg")
+                    # face3 = cv2.imread("/face/3.jpg")
+
+                    card1 = cv2.imread("/card/1.jpg")
+                    # card2 = cv2.imread("/card/2.jpg")
+                    # card3 = cv2.imread("/card/3.jpg")
+
+                    face_encoding1 = face_recognition.face_encodings(face1)
+                    # face_encoding2 = face_recognition.face_encodings(face2)
+                    # face_encoding3 = face_recognition.face_encodings(face3)
+
+                    card_encoding1 = face_recognition.face_encodings(card1)
+                    # card_encoding2 = face_recognition.face_encodings(card2)
+                    # card_encoding3 = face_recognition.face_encodings(card3)
+
+                    reasult1 = face_recognition.compare_faces(face_encoding1, card_encoding1)
+                    # reasult2 = face_recognition.compare_faces(face_encoding2, card_encoding2)
+                    # reasult3 = face_recognition.compare_faces(face_encoding3, card_encoding3)
+
+
+                    print(reasult1)
+                    # print(reasult1+"/n", reasult2+"/n", reasult3)
+
+                else:
+                    color = (0,0,255)
+
 
                 cv2.putText(frame,'Press Q to Quit',(5,470), font,0.5,(255,255,255),1,cv2.LINE_AA)
 
-            for name, (top, right, bottom, left) in predictions:
+            for index, (name, (top, right, bottom, left)) in enumerate(predictions):
+
                 cv2.rectangle(frame, (left, top), (right, bottom), color, 4)
                 cv2.putText(frame, name, (left, top), font, 1, color, stroke, cv2.LINE_AA)
 
@@ -147,6 +200,7 @@ def start():
 
         cv2.imshow('frame', frame)
         if cv2.waitKey(1) & 0xFF == ord('q'):
+            deleteCompareFile()
             break
        
     cv2.destroyAllWindows()
