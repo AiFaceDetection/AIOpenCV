@@ -101,7 +101,7 @@ def start():
 
     cap = cv2.VideoCapture(0)
 
-    cap.set(3,1280)
+    cap.set(3,2560)
     # 852 480p
     # 1280 720p
     # 1920 full HD
@@ -149,8 +149,6 @@ def start():
 
                     cropedFrame.append(name)
 
-                    cv2.rectangle(frame, (left, top), (right, bottom), color, 4)
-                    cv2.putText(frame, name, (left, top), font, 1, color, stroke, cv2.LINE_AA)
 
 
                     if (len(predictions) == 2): # Have 2 face in frame
@@ -164,28 +162,31 @@ def start():
 
                         try:
                             # t1 = threading.Thread(target=encodeImg, args=(10,"Hello",))
-                            img1 = cv2.imread("./face/1.jpg")
-                            img2 = cv2.imread("./card/1.jpg")
+                            img1 = cv2.imread("./face/0.jpg")
+                            img2 = cv2.imread("./card/0.jpg")
 
-                            reasult = DeepFace.verify(img1, img2,model_name = 'Facenet')
+                            reasult = DeepFace.verify(img1, img2)
 
                             arrayReasult = list(reasult.values())
 
                             print(arrayReasult)
-                            
+
                             MAX_THRESHOLD = 0.5
                             # print(arrayReasult[0], arrayReasult[1])
-                            if (arrayReasult[1] > MAX_THRESHOLD):
-                                output = False
-                            else:
-                                output = True
+                            # if (arrayReasult[1] > MAX_THRESHOLD):
+                            #     output = False
+                            # else:
+                            #     output = True
 
-                            print(output, arrayReasult[1])
+                            # print(output, arrayReasult[1])
 
                         except:
                             print("Card is not clear")
                     else:
                         color = (0,0,255)
+
+                    cv2.rectangle(frame, (left, top), (right, bottom), color, 4)
+                    cv2.putText(frame, name, (left, top), font, 1, color, stroke, cv2.LINE_AA)
 
                 # t1 = threading.Thread(target=encodeImg, args=(10,"Hello", ))
                 # t1.start()
