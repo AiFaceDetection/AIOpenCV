@@ -2,8 +2,8 @@ import os
 import dlib
 import cv2
 
-# name = input("Enter your name: ")
-name ="test"
+name = input("Enter your name: ")
+
 path = "./images/" + name
 num_of_images = 1
 

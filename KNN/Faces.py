@@ -99,9 +99,9 @@ def start():
     # STEP 1: Train the KNN classifier and save it to disk
     # Once the model is trained and saved, you can skip this step next time.
 
-    cap = cv2.VideoCapture(0)
+    cap = cv2.VideoCapture(2)
 
-    cap.set(3,2560)
+    cap.set(3,852)
     # 852 480p
     # 1280 720p
     # 1920 full HD
@@ -165,7 +165,7 @@ def start():
                             img1 = cv2.imread("./face/0.jpg")
                             img2 = cv2.imread("./card/0.jpg")
 
-                            reasult = DeepFace.verify(img1, img2)
+                            reasult = DeepFace.verify(img1, img2, model = "DeepFace")
 
                             arrayReasult = list(reasult.values())
 
@@ -205,6 +205,7 @@ def start():
         else:
             lag = 0
         cv2.imshow('frame', frame)
+        
         if cv2.waitKey(1) & 0xFF == ord('q'):
             deleteCompareFile()
             break
